@@ -1,11 +1,14 @@
+const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
+const Contact = require("../models/contactModel");
 
 //@desc Get all contacts
 //@route GET/api/contacts
 //access public 
 
 const getContacts = asyncHandler(async(req,res)=>{
-    res.status(200).json({message : "Get all the contacts"});
+    const contact =  await Contact.find();
+    res.status(200).json(contact);
 })
 
 //@desc Create New contacts
@@ -19,7 +22,10 @@ const createContact =  asyncHandler(async(req,res)=>{
         res.status(400);
         throw new Error("All fields are mandatory !");
     }
-    res.status(201).json({message : "Create contacts"});
+    const contact = await Contact.create({
+        name,email,phone,
+    });
+    res.status(201).json(contact);
 })
 
 //@desc Get contact
@@ -27,7 +33,16 @@ const createContact =  asyncHandler(async(req,res)=>{
 //access public 
 
 const getContact = asyncHandler(async(req,res)=>{
-    res.status(200).json({message : `get contact for ${req.params.id}`});
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+       res.status(400);
+       throw new Error("Invalid contact ID");
+    }
+    const contact = await Contact.findById(req.params.id);
+    if(!contact){
+        res.status(404);
+        throw new Error("Contact not found");
+    }
+    res.status(200).json(contact);
 })
 
 //@desc Update contact
@@ -35,7 +50,22 @@ const getContact = asyncHandler(async(req,res)=>{
 //access public 
 
 const updateContact = asyncHandler(async(req,res)=>{
-    res.status(200).json({message : `Update contact for ${req.params.id}`});
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+       res.status(400);
+       throw new Error("Invalid contact ID");
+    }
+    const contact = await Contact.findById(req.params.id);
+    if(!contact){
+        res.status(400);
+        throw new Error("Contact not Found");
+    }
+
+    const updateContact = await Contact.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {new : true}
+    );
+    res.status(200).json(updateContact);
 })
 
 //@desc Delete contact
@@ -43,7 +73,17 @@ const updateContact = asyncHandler(async(req,res)=>{
 //access public 
 
 const deleteContact = asyncHandler(async(req,res)=>{
-    res.status(200).json({message : `Delete contact for ${req.params.id}`});
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+       res.status(400);
+       throw new Error("Invalid contact ID");
+    }
+    const contact = await Contact.findById(req.params.id);
+    if(!contact){
+        res.status(400);
+        throw new Error("Contact not Found");
+    }
+    await Contact.findByIdAndDelete(req.params.id);
+    res.status(200).json(contact);
 })
 
 module.exports = { getContacts, createContact ,getContact, updateContact,deleteContact};
