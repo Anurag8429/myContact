@@ -56,7 +56,7 @@ const updateContact = asyncHandler(async(req,res)=>{
     }
     const contact = await Contact.findById(req.params.id);
     if(!contact){
-        res.status(400);
+        res.status(404);
         throw new Error("Contact not Found");
     }
 
@@ -79,7 +79,7 @@ const deleteContact = asyncHandler(async(req,res)=>{
     }
     const contact = await Contact.findById(req.params.id);
     if(!contact){
-        res.status(400);
+        res.status(404);
         throw new Error("Contact not Found");
     }
     await Contact.findByIdAndDelete(req.params.id);
